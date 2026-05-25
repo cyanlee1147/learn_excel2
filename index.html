@@ -30,7 +30,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100
 .logo-s{font-size:11px;opacity:.75;margin-top:1px}
 .nav{flex:1;padding:6px 0}
 .ng{padding:9px 13px 2px;font-size:10px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
-.ni{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;font-size:13px;color:var(--t2);border-left:3px solid transparent;transition:all .12s}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer !important;font-size:13px;color:var(--t2);border-left:3px solid transparent;transition:all .12s}
 .ni:hover{color:var(--tx);background:var(--surf2)}
 .ni.on{color:var(--ac);border-left-color:var(--ac);background:var(--acbg);font-weight:600}
 .nd{width:5px;height:5px;border-radius:50%;background:var(--bd2);flex-shrink:0}
@@ -186,22 +186,22 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   </div>
   <div class="nav">
     <div class="ng">入門</div>
-    <div class="ni on" onclick="go('intro',this)"><span class="nd"></span>什麼是樞紐分析表</div>
-    <div class="ni" onclick="go('data',this)"><span class="nd"></span>資料準備原則</div>
-    <div class="ni" onclick="go('steps',this)"><span class="nd"></span>建立步驟圖解</div>
+    <div class="ni on" onclick="go('intro',this)" style="cursor:pointer"><span class="nd"></span>什麼是樞紐分析表</div>
+    <div class="ni" onclick="go('data',this)" style="cursor:pointer"><span class="nd"></span>資料準備原則</div>
+    <div class="ni" onclick="go('steps',this)" style="cursor:pointer"><span class="nd"></span>建立步驟圖解</div>
     <div class="ng">核心概念</div>
-    <div class="ni" onclick="go('zones',this)"><span class="nd"></span>四大區域解析</div>
-    <div class="ni" onclick="go('builder',this)"><span class="nd"></span>互動樞紐建立器</div>
+    <div class="ni" onclick="go('zones',this)" style="cursor:pointer"><span class="nd"></span>四大區域解析</div>
+    <div class="ni" onclick="go('builder',this)" style="cursor:pointer"><span class="nd"></span>互動樞紐建立器</div>
     <div class="ng">進階功能</div>
-    <div class="ni" onclick="go('agg',this)"><span class="nd"></span>彙總方式大全</div>
-    <div class="ni" onclick="go('group',this)"><span class="nd"></span>群組與日期分析</div>
-    <div class="ni" onclick="go('slicer',this)"><span class="nd"></span>交叉分析篩選器</div>
-    <div class="ni" onclick="go('calc',this)"><span class="nd"></span>計算欄位與項目</div>
+    <div class="ni" onclick="go('agg',this)" style="cursor:pointer"><span class="nd"></span>彙總方式大全</div>
+    <div class="ni" onclick="go('group',this)" style="cursor:pointer"><span class="nd"></span>群組與日期分析</div>
+    <div class="ni" onclick="go('slicer',this)" style="cursor:pointer"><span class="nd"></span>交叉分析篩選器</div>
+    <div class="ni" onclick="go('calc',this)" style="cursor:pointer"><span class="nd"></span>計算欄位與項目</div>
     <div class="ng">視覺化</div>
-    <div class="ni" onclick="go('charts',this)"><span class="nd"></span>樞紐圖表分析</div>
-    <div class="ni" onclick="go('vs',this)"><span class="nd"></span>vs 一般函式</div>
+    <div class="ni" onclick="go('charts',this)" style="cursor:pointer"><span class="nd"></span>樞紐圖表分析</div>
+    <div class="ni" onclick="go('vs',this)" style="cursor:pointer"><span class="nd"></span>vs 一般函式</div>
     <div class="ng">練習</div>
-    <div class="ni" onclick="go('quiz',this)"><span class="nd"></span>測驗挑戰</div>
+    <div class="ni" onclick="go('quiz',this)" style="cursor:pointer"><span class="nd"></span>測驗挑戰</div>
   </div>
   <div class="foot">
     <button class="dlbtn" onclick="dlXL()">📥 下載練習 Excel 檔</button>
@@ -316,11 +316,11 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   <div class="pb2">
     <div class="agg">
       <span style="font-size:12px;color:var(--t2);padding:4px 0">彙總方式：</span>
-      <button class="ab on" onclick="setAgg('sum',this)">加總</button>
-      <button class="ab" onclick="setAgg('avg',this)">平均值</button>
-      <button class="ab" onclick="setAgg('count',this)">計數</button>
-      <button class="ab" onclick="setAgg('max',this)">最大值</button>
-      <button class="ab" onclick="setAgg('min',this)">最小值</button>
+      <button class="ab" onclick="setAgg('sum',this)" on">加總</button>
+      <button class="ab" onclick="setAgg('avg',this)"">平均值</button>
+      <button class="ab" onclick="setAgg('count',this)"">計數</button>
+      <button class="ab" onclick="setAgg('max',this)"">最大值</button>
+      <button class="ab" onclick="setAgg('min',this)"">最小值</button>
     </div>
     <div class="bw">
       <div class="fp"><h3>可用欄位</h3><div id="fp"></div></div>
@@ -387,23 +387,23 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
     <h2>互動示範 — 點選篩選條件</h2>
     <div class="slw">
       <div class="slb"><div class="slt">地區</div>
-        <button class="sbt on" onclick="tgSl(this,'region','全部')">全部</button>
-        <button class="sbt" onclick="tgSl(this,'region','北區')">北區</button>
-        <button class="sbt" onclick="tgSl(this,'region','中區')">中區</button>
-        <button class="sbt" onclick="tgSl(this,'region','南區')">南區</button>
+        <button class="sbt" onclick="tgSl(this,'region','全部')" on">全部</button>
+        <button class="sbt" onclick="tgSl(this,'region','北區')"">北區</button>
+        <button class="sbt" onclick="tgSl(this,'region','中區')"">中區</button>
+        <button class="sbt" onclick="tgSl(this,'region','南區')"">南區</button>
       </div>
       <div class="slb"><div class="slt">產品</div>
-        <button class="sbt on" onclick="tgSl(this,'product','全部')">全部</button>
-        <button class="sbt" onclick="tgSl(this,'product','筆電')">筆電</button>
-        <button class="sbt" onclick="tgSl(this,'product','手機')">手機</button>
-        <button class="sbt" onclick="tgSl(this,'product','平板')">平板</button>
+        <button class="sbt" onclick="tgSl(this,'product','全部')" on">全部</button>
+        <button class="sbt" onclick="tgSl(this,'product','筆電')"">筆電</button>
+        <button class="sbt" onclick="tgSl(this,'product','手機')"">手機</button>
+        <button class="sbt" onclick="tgSl(this,'product','平板')"">平板</button>
       </div>
       <div class="slb"><div class="slt">季度</div>
-        <button class="sbt on" onclick="tgSl(this,'quarter','全部')">全部</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q1')">Q1</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q2')">Q2</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q3')">Q3</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q4')">Q4</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','全部')" on">全部</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q1')"">Q1</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q2')"">Q2</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q3')"">Q3</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q4')"">Q4</button>
       </div>
     </div>
     <div id="sl-r" class="tw"></div>
@@ -452,10 +452,10 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   <div class="ph"><div class="badge">📈 視覺化</div><h1>樞紐圖表分析</h1><p class="desc">以下圖表模擬真實樞紐分析的各類視覺化報表，點選切換不同分析視角。</p></div>
   <div class="pb2">
     <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="ab on" onclick="scv('sales',this)">銷售分析</button>
-      <button class="ab" onclick="scv('trend',this)">趨勢分析</button>
-      <button class="ab" onclick="scv('ratio',this)">佔比分析</button>
-      <button class="ab" onclick="scv('perf',this)">績效分析</button>
+      <button class="ab" onclick="scv('sales',this)" on">銷售分析</button>
+      <button class="ab" onclick="scv('trend',this)"">趨勢分析</button>
+      <button class="ab" onclick="scv('ratio',this)"">佔比分析</button>
+      <button class="ab" onclick="scv('perf',this)"">績效分析</button>
     </div>
     <div id="cv-sales">
       <div class="g2">
@@ -529,7 +529,7 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   <div class="pb2">
     <div class="qh"><div class="qp"><span id="qA">0</span> / 10 已作答</div><div class="qp">正確 <span id="qC">0</span></div></div>
     <div id="qa"></div>
-    <button class="qnb" id="qnb" style="display:none" onclick="nextQ()">下一題 →</button>
+    <button class="qnb" id="qnb" style="display:none" id="qnb-btn" >下一題 →</button>
   </div>
 </div>
 
