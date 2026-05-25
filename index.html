@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Excel 樞紐分析 — 互動學習</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f4f6fb;--surf:#fff;--surf2:#f0f2f7;--bd:rgba(0,0,0,.08);--bd2:rgba(0,0,0,.14);
+  --ac:#2563eb;--ac2:#1d4ed8;--acbg:rgba(37,99,235,.08);--acbd:rgba(37,99,235,.22);
+  --gr:#059669;--gbg:#ecfdf5;--gbd:rgba(5,150,105,.22);
+  --am:#d97706;--abg:#fffbeb;--abd:rgba(217,119,6,.22);
+  --pu:#7c3aed;--pbg:rgba(124,58,237,.08);--pbd:rgba(124,58,237,.22);
+  --re:#dc2626;--rbg:#fff1f2;--rbd:rgba(220,38,38,.2);
+  --tx:#0f172a;--t2:#475569;--t3:#94a3b8;
+  --mono:ui-monospace,"Cascadia Code","Courier New",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft JhengHei",sans-serif;
+  --r:10px;--rl:14px;--sh:0 1px 4px rgba(0,0,0,.07)
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px;line-height:1.6}
+.app{display:flex;min-height:100vh}
+.side{width:214px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--bd);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.main{flex:1;overflow-x:hidden;min-width:0;min-height:200px}
+.logo{padding:18px 16px 14px;background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff}
+.logo-icon{font-size:22px;margin-bottom:3px}
+.logo-t{font-size:14px;font-weight:700}
+.logo-s{font-size:11px;opacity:.75;margin-top:1px}
+.nav{flex:1;padding:6px 0}
+.ng{padding:9px 13px 2px;font-size:10px;color:var(--t3);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+.ni{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;font-size:13px;color:var(--t2);border-left:3px solid transparent;transition:all .12s}
+.ni:hover{color:var(--tx);background:var(--surf2)}
+.ni.on{color:var(--ac);border-left-color:var(--ac);background:var(--acbg);font-weight:600}
+.nd{width:5px;height:5px;border-radius:50%;background:var(--bd2);flex-shrink:0}
+.ni.on .nd{background:var(--ac)}
+.foot{padding:10px 12px;border-top:1px solid var(--bd)}
+.dlbtn{width:100%;padding:8px;background:#16a34a;color:#fff;border:none;border-radius:var(--r);font-size:13px;font-family:var(--sans);font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.dlbtn:hover{background:#15803d}
+.pw{height:3px;background:var(--bd);border-radius:2px;margin-top:7px;overflow:hidden;display:none}
+.pb{height:100%;background:#16a34a;width:0;transition:width .4s}
+.panel{display:none}
+.panel.on{display:block;animation:fi .18s ease}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.ph{padding:30px 38px 0}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--acbg);color:var(--ac);border:1px solid var(--acbd);margin-bottom:8px;letter-spacing:.03em}
+h1{font-size:24px;font-weight:700;line-height:1.25;margin-bottom:7px}
+.desc{font-size:14px;color:var(--t2);max-width:620px;line-height:1.75}
+.pb2{padding:18px 38px 44px}
+h2{font-size:15px;font-weight:700;margin:24px 0 10px;position:relative;padding-left:12px}
+h2::before{content:"";position:absolute;left:0;top:3px;bottom:3px;width:3px;background:var(--ac);border-radius:2px}
+h3{font-size:11.5px;font-weight:700;color:var(--t2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.card{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);box-shadow:var(--sh)}
+.cp{padding:15px 18px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.full{grid-column:1/-1}
+.stat{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r);padding:12px 15px;box-shadow:var(--sh);text-align:center}
+.sv{font-size:22px;font-weight:700;color:var(--ac)}
+.sl{font-size:11px;color:var(--t2);margin-top:2px}
+.tw{overflow-x:auto;border-radius:var(--rl);border:1px solid var(--bd);box-shadow:var(--sh)}
+.t{width:100%;border-collapse:collapse;font-size:13px}
+.t th{background:var(--surf2);padding:7px 11px;text-align:left;border-bottom:1px solid var(--bd2);font-weight:600;font-size:11px;color:var(--t2);letter-spacing:.02em}
+.t td{padding:6px 11px;border-bottom:1px solid var(--bd);vertical-align:middle}
+.t tr:last-child td{border-bottom:none}
+.t tr:hover td{background:var(--surf2)}
+.num{text-align:right;font-family:var(--mono);font-size:12px}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600}
+.tb{background:var(--acbg);color:var(--ac);border:1px solid var(--acbd)}
+.tg{background:var(--gbg);color:var(--gr);border:1px solid var(--gbd)}
+.ta{background:var(--abg);color:var(--am);border:1px solid var(--abd)}
+.tp{background:var(--pbg);color:var(--pu);border:1px solid var(--pbd)}
+.ccg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.cc{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);padding:14px;box-shadow:var(--sh)}
+.cc-i{font-size:20px;margin-bottom:6px}
+.cc-t{font-size:13px;font-weight:700;margin-bottom:4px}
+.cc-d{font-size:12.5px;color:var(--t2);line-height:1.6}
+.tip{display:flex;gap:9px;background:var(--gbg);border:1px solid var(--gbd);border-radius:var(--r);padding:11px 14px;font-size:13px;color:#065f46;margin:12px 0;line-height:1.6}
+.warn{display:flex;gap:9px;background:var(--abg);border:1px solid var(--abd);border-radius:var(--r);padding:11px 14px;font-size:13px;color:#78350f;margin:12px 0;line-height:1.6}
+.info{display:flex;gap:9px;background:var(--acbg);border:1px solid var(--acbd);border-radius:var(--r);padding:11px 14px;font-size:13px;color:#1e40af;margin:12px 0;line-height:1.6}
+code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;padding:1px 5px;border-radius:4px;border:1px solid #e2e8f0}
+.fb{background:#1e1e2e;color:#e2e8f0;border-radius:0 var(--r) var(--r) 0;padding:11px 15px;font-family:var(--mono);font-size:12px;border-left:3px solid var(--ac);margin:10px 0;line-height:1.8}
+.fb .fn{color:#fbbf24}.fb .s{color:#86efac}.fb .cm{color:#64748b}
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--bd)}
+.step:last-child{border-bottom:none}
+.sn{width:26px;height:26px;border-radius:50%;background:var(--ac);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.st{font-size:13.5px;font-weight:700;margin-bottom:3px}
+.sd{font-size:13px;color:var(--t2);line-height:1.6}
+.si{background:var(--surf2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 11px;margin-top:6px;font-size:12px;font-family:var(--mono);color:var(--t2)}
+/* builder */
+.bw{display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:start}
+.fp{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);padding:12px;box-shadow:var(--sh)}
+.fi{display:flex;align-items:center;gap:7px;padding:6px 9px;border:1px solid var(--bd2);border-radius:7px;margin-bottom:5px;cursor:grab;font-size:13px;background:var(--surf2);user-select:none;transition:all .12s}
+.fi:hover{border-color:var(--ac);background:var(--acbg);color:var(--ac)}
+.fi.dr{opacity:.35;border-style:dashed}
+.zones{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.zone{border:2px dashed var(--bd2);border-radius:var(--r);min-height:66px;padding:8px;transition:all .15s}
+.zone.dov{border-color:var(--ac);background:var(--acbg)}
+.zl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--t3);margin-bottom:6px}
+.zc{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:5px;font-size:12px;font-weight:600;margin:2px}
+.zc .rm{cursor:pointer;opacity:.6;font-size:13px;margin-left:1px}.zc .rm:hover{opacity:1}
+.cr{background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe}
+.cc2{background:#d1fae5;color:#065f46;border:1px solid #a7f3d0}
+.cv{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+.cf{background:#fef3c7;color:#92400e;border:1px solid #fde68a}
+.pout{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);padding:12px;box-shadow:var(--sh);margin-top:8px;min-height:80px}
+.pph{color:var(--t3);font-size:13px;text-align:center;padding:20px 0}
+.ptw{overflow-x:auto}
+.pt{border-collapse:collapse;font-size:12.5px;width:100%}
+.pt th{background:var(--acbg);border:1px solid var(--acbd);padding:5px 11px;font-weight:600;color:var(--ac);text-align:left}
+.pt th.ch{background:var(--gbg);color:var(--gr);border-color:var(--gbd)}
+.pt td{border:1px solid var(--bd);padding:5px 11px;text-align:right;font-family:var(--mono);font-size:12px}
+.pt td.rl{text-align:left;font-family:var(--sans);font-weight:600;background:var(--surf2)}
+.pt tr:hover td{background:#f8faff}
+.pt .gr{background:var(--surf2);font-weight:700}
+.agg{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.ab{padding:4px 11px;border:1px solid var(--bd2);border-radius:20px;font-size:12px;cursor:pointer;background:var(--surf2);color:var(--t2);font-family:var(--sans);transition:all .1s}
+.ab.on{background:var(--acbg);border-color:var(--ac);color:var(--ac);font-weight:600}
+/* slicer */
+.slw{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.slb{background:var(--surf);border:1px solid var(--bd);border-radius:var(--r);padding:10px;box-shadow:var(--sh);min-width:115px}
+.slt{font-size:10px;font-weight:700;color:var(--t2);letter-spacing:.05em;margin-bottom:6px;text-transform:uppercase}
+.sbt{display:block;width:100%;padding:5px 8px;margin-bottom:3px;border:1px solid var(--bd2);border-radius:5px;background:var(--surf2);font-size:12px;cursor:pointer;text-align:left;font-family:var(--sans);transition:all .1s}
+.sbt.on{background:var(--acbg);border-color:var(--ac);color:var(--ac);font-weight:600}
+.sbt:hover:not(.on){background:#e8ebf4}
+/* vs */
+.vsg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.vc{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);padding:14px;box-shadow:var(--sh)}
+.vc.ac{border-color:var(--acbd)}
+.vt{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.vi{display:flex;gap:7px;padding:4px 0;border-bottom:1px solid var(--bd);font-size:12.5px;color:var(--t2)}
+.vi:last-child{border-bottom:none}
+.gd{color:var(--gr);font-weight:700;flex-shrink:0}
+.bd2{color:var(--re);font-weight:700;flex-shrink:0}
+/* chart */
+.chc{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);padding:15px 18px;box-shadow:var(--sh)}
+.chc h3{margin-bottom:10px}
+/* quiz */
+.qh{display:flex;gap:9px;margin-bottom:15px}
+.qp{background:var(--surf);border:1px solid var(--bd);border-radius:20px;padding:5px 13px;font-size:13px;color:var(--t2);box-shadow:var(--sh)}
+.qp span{color:var(--ac);font-weight:700}
+.qc{background:var(--surf);border:1px solid var(--bd);border-radius:var(--rl);padding:20px;box-shadow:var(--sh);margin-bottom:10px}
+.qn{font-size:11px;color:var(--t3);font-weight:600;margin-bottom:7px}
+.qq{font-size:14px;font-weight:600;line-height:1.5;margin-bottom:8px}
+.qow{display:flex;flex-direction:column;gap:6px}
+.qo{padding:9px 13px;border:1px solid var(--bd);border-radius:var(--r);background:var(--surf2);cursor:pointer;font-size:13px;color:var(--tx);text-align:left;font-family:var(--sans);transition:all .12s}
+.qo:hover:not(:disabled){border-color:var(--ac);background:var(--acbg);color:var(--ac)}
+.qo.ok{background:#f0fdf4;border-color:#86efac;color:#166534}
+.qo.no{background:#fff1f2;border-color:#fca5a5;color:#991b1b}
+.qe{margin-top:10px;padding:10px 13px;border-radius:var(--r);font-size:13px;background:var(--surf2);color:var(--t2);border-left:3px solid var(--ac);line-height:1.6}
+.qnb{margin-top:10px;padding:7px 20px;background:var(--ac);color:#fff;border:none;border-radius:8px;font-size:13px;font-family:var(--sans);cursor:pointer;font-weight:600}
+.qnb:hover{background:var(--ac2)}
+.done{text-align:center;padding:52px 20px}
+.ds{font-size:48px;font-weight:700;color:var(--ac);margin:8px 0 5px}
+.db{color:var(--t2);font-size:13px;margin-bottom:20px}
+.rb{padding:9px 28px;background:var(--ac);color:#fff;border:none;border-radius:10px;font-size:14px;cursor:pointer;font-weight:600}
+.rb:hover{background:var(--ac2)}
+@media(max-width:820px){
+  .app{flex-direction:column}
+  .side{width:100%;height:auto;position:static;flex-direction:row;flex-wrap:wrap}
+  .logo{padding:12px 16px 10px;flex:0 0 100%}
+  .nav{display:flex;flex-wrap:wrap;padding:4px 8px;flex:1;overflow-x:auto}
+  .ng{display:none}
+  .ni{padding:5px 10px;font-size:12px;border-left:none;border-bottom:3px solid transparent;white-space:nowrap;flex-shrink:0}
+  .ni.on{border-bottom-color:var(--ac);border-left:none;background:none;color:var(--ac)}
+  .foot{flex:0 0 100%;padding:8px 12px}
+  .dlbtn{max-width:220px}
+  .ph{padding:20px 16px 0}
+  .pb2{padding:14px 16px 36px}
+  .g2,.g3,.g4,.bw,.ccg,.vsg{grid-template-columns:1fr}
+  .full{grid-column:1}
+  h1{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<nav class="side">
+  <div class="logo">
+    <div class="logo-icon" style="font-size:24px">&#x1F504;</div>
+    <div class="logo-t">樞紐分析學習</div>
+    <div class="logo-s">Pivot Table 完整教學</div>
+  </div>
+  <div class="nav">
+    <div class="ng">入門</div>
+    <div class="ni on" onclick="go('intro',this)"><span class="nd"></span>什麼是樞紐分析表</div>
+    <div class="ni" onclick="go('data',this)"><span class="nd"></span>資料準備原則</div>
+    <div class="ni" onclick="go('steps',this)"><span class="nd"></span>建立步驟圖解</div>
+    <div class="ng">核心概念</div>
+    <div class="ni" onclick="go('zones',this)"><span class="nd"></span>四大區域解析</div>
+    <div class="ni" onclick="go('builder',this)"><span class="nd"></span>互動樞紐建立器</div>
+    <div class="ng">進階功能</div>
+    <div class="ni" onclick="go('agg',this)"><span class="nd"></span>彙總方式大全</div>
+    <div class="ni" onclick="go('group',this)"><span class="nd"></span>群組與日期分析</div>
+    <div class="ni" onclick="go('slicer',this)"><span class="nd"></span>交叉分析篩選器</div>
+    <div class="ni" onclick="go('calc',this)"><span class="nd"></span>計算欄位與項目</div>
+    <div class="ng">視覺化</div>
+    <div class="ni" onclick="go('charts',this)"><span class="nd"></span>樞紐圖表分析</div>
+    <div class="ni" onclick="go('vs',this)"><span class="nd"></span>vs 一般函式</div>
+    <div class="ng">練習</div>
+    <div class="ni" onclick="go('quiz',this)"><span class="nd"></span>測驗挑戰</div>
+  </div>
+  <div class="foot">
+    <button class="dlbtn" onclick="dlXL()">📥 下載練習 Excel 檔</button>
+    <div class="pw" id="pw"><div class="pb" id="pb"></div></div>
+  </div>
+</nav>
+<div class="main">
+
+<div id="panel-intro" class="panel on">
+  <div class="ph"><div class="badge">🔄 入門概念</div><h1>什麼是樞紐分析表？</h1><p class="desc">Pivot Table 是 Excel 最強大的資料分析工具，不需要寫公式，用拖曳就能在幾秒內將幾千筆原始資料變成清晰的彙總報表。</p></div>
+  <div class="pb2">
+    <div class="g4" style="margin-bottom:14px">
+      <div class="stat"><div class="sv">0</div><div class="sl">需要寫的公式</div></div>
+      <div class="stat"><div class="sv">3秒</div><div class="sl">建立完整報表</div></div>
+      <div class="stat"><div class="sv">∞</div><div class="sl">資料視角切換</div></div>
+      <div class="stat"><div class="sv">百萬+</div><div class="sl">可處理資料筆數</div></div>
+    </div>
+    <h2>核心功能一覽</h2>
+    <div class="ccg">
+      <div class="cc"><div class="cc-i">📊</div><div class="cc-t">自動彙總</div><div class="cc-d">數千筆交易明細，一鍵彙總為部門/月份/產品的加總、平均、計數報表。</div><div class="tag tb" style="margin-top:8px;font-size:11px">SUM / COUNT / AVERAGE</div></div>
+      <div class="cc"><div class="cc-i">🔄</div><div class="cc-t">靈活旋轉</div><div class="cc-d">同一份資料，隨時切換「以部門看月份」或「以月份看部門」，秒速重組報表結構。</div><div class="tag tg" style="margin-top:8px;font-size:11px">Pivot = 旋轉視角</div></div>
+      <div class="cc"><div class="cc-i">🎛️</div><div class="cc-t">互動篩選</div><div class="cc-d">搭配交叉分析篩選器（Slicer），點一個按鈕即可切換地區、季度、產品類別。</div><div class="tag ta" style="margin-top:8px;font-size:11px">Slicer 篩選器</div></div>
+      <div class="cc"><div class="cc-i">📈</div><div class="cc-t">即時更新</div><div class="cc-d">原始資料修改後，只需按「重新整理」，所有報表和圖表自動同步，不需重做。</div><div class="tag tp" style="margin-top:8px;font-size:11px">Refresh 自動更新</div></div>
+    </div>
+    <h2>一個真實例子</h2>
+    <div class="g2">
+      <div><h3>原始資料（500筆）</h3>
+        <div class="tw" style="margin-top:7px"><table class="t">
+          <tr><th>日期</th><th>業務員</th><th>地區</th><th>產品</th><th class="num">金額</th></tr>
+          <tr><td>2024/01/05</td><td>王大明</td><td>北區</td><td>筆電</td><td class="num">38,000</td></tr>
+          <tr><td>2024/01/08</td><td>林小美</td><td>南區</td><td>手機</td><td class="num">15,900</td></tr>
+          <tr><td>2024/01/12</td><td>陳志偉</td><td>北區</td><td>平板</td><td class="num">22,000</td></tr>
+          <tr><td style="color:var(--t3)">… 497 筆</td><td></td><td></td><td></td><td></td></tr>
+        </table></div>
+      </div>
+      <div><h3>樞紐分析結果（3秒完成）</h3>
+        <div class="tw" style="margin-top:7px"><table class="t">
+          <tr><th>地區</th><th class="num">筆電</th><th class="num">手機</th><th class="num">平板</th></tr>
+          <tr><td><span class="tag tb">北區</span></td><td class="num">328,000</td><td class="num">145,000</td><td class="num">198,000</td></tr>
+          <tr><td><span class="tag tg">中區</span></td><td class="num">256,000</td><td class="num">189,000</td><td class="num">122,000</td></tr>
+          <tr><td><span class="tag ta">南區</span></td><td class="num">198,000</td><td class="num">210,000</td><td class="num">88,000</td></tr>
+          <tr style="font-weight:700"><td>總計</td><td class="num">782,000</td><td class="num">544,000</td><td class="num">408,000</td></tr>
+        </table></div>
+      </div>
+    </div>
+    <div class="tip">💡 上方交叉報表，用樞紐分析只要把「地區」拖到列、「產品」拖到欄、「金額」拖到值——三個動作完成。用 SUMIFS 需要手寫 9 格公式！</div>
+  </div>
+</div>
+
+<div id="panel-data" class="panel">
+  <div class="ph"><div class="badge">📋 資料準備</div><h1>資料準備原則</h1><p class="desc">樞紐分析的品質取決於原始資料的品質。遵守這五個原則，讓資料隨時可分析。</p></div>
+  <div class="pb2">
+    <div class="steps">
+      <div class="step"><div class="sn">1</div><div><div class="st">每欄必須有標題</div><div class="sd">第一列必須是欄位標題，每個欄位都要有名字。空白標題或合併儲存格的標題會讓樞紐分析無法正確建立。</div><div class="si">✓ 日期｜業務員｜地區｜產品｜金額<br>✗ A欄空白 或 B欄「業務/地區」（合併）</div></div></div>
+      <div class="step"><div class="sn">2</div><div><div class="st">每列是一筆完整記錄，禁止合併儲存格</div><div class="sd">資料區域不能有合併儲存格。每一列都是獨立記錄，欄位值不能跨列合併。</div><div class="si">✗ 「北區」合併了 B2:B4 三格<br>✓ 每列都完整填入「北區」</div></div></div>
+      <div class="step"><div class="sn">3</div><div><div class="st">資料中不能有空白列</div><div class="sd">中間有空白列會讓 Excel 誤以為資料到此結束，只讀取空白列以前的部分。</div><div class="si">✗ 第 5 列是空白列 → Excel 只讀到第 4 列<br>✓ 500 筆資料連續排列，無空行</div></div></div>
+      <div class="step"><div class="sn">4</div><div><div class="st">同欄資料型態一致</div><div class="sd">「金額」欄不能混有文字（如「38000元」），「日期」欄要是真正的日期格式，不能是純文字字串。</div><div class="si">✗ 金額欄混用：38000、「NT$45,000」、42000元<br>✓ 金額欄純數字：38000、45000、42000</div></div></div>
+      <div class="step"><div class="sn">5</div><div><div class="st">建議先轉成「表格」（Ctrl+T）</div><div class="sd">將資料轉成 Excel 表格後，新增資料時樞紐分析的範圍會自動擴展，只需重新整理即可同步。</div><div class="si">插入 → 表格 → 勾選「我的表格有標題」<br>之後樞紐分析來源選這個表格名稱</div></div></div>
+    </div>
+    <div class="warn">⚠️ 開始建立樞紐分析前，先按 Ctrl+End 確認資料範圍是否正確，避免遺漏資料或包含多餘空白。</div>
+  </div>
+</div>
+
+<div id="panel-steps" class="panel">
+  <div class="ph"><div class="badge">🚀 建立步驟</div><h1>建立樞紐分析表 — 完整步驟</h1><p class="desc">從空白工作表到完整報表，跟著六個步驟，第一次就成功。</p></div>
+  <div class="pb2">
+    <div class="steps">
+      <div class="step"><div class="sn">1</div><div><div class="st">點選資料範圍中的任一儲存格</div><div class="sd">只要游標在資料範圍內，Excel 會自動偵測整個資料表，不需要先選取全部資料。</div><div class="si">→ 點選 A1（或資料區域中任何有內容的儲存格）</div></div></div>
+      <div class="step"><div class="sn">2</div><div><div class="st">插入 → 樞紐分析表</div><div class="sd">在功能區點選「插入」分頁，找到最左側的「樞紐分析表」按鈕並點擊。</div><div class="si">功能區：插入 ▶ 樞紐分析表 ▶ 從表格/範圍</div></div></div>
+      <div class="step"><div class="sn">3</div><div><div class="st">確認資料範圍與放置位置</div><div class="sd">確認來源範圍正確（通常 Excel 會自動偵測），選擇放到「新工作表」（建議），或現有工作表的指定位置。</div><div class="si">來源：工作表1!$A$1:$E$501 　位置：新工作表（推薦）</div></div></div>
+      <div class="step"><div class="sn">4</div><div><div class="st">拖曳欄位到四個區域</div><div class="sd">右側出現「樞紐分析表欄位」面板。將欄位拖曳到列、欄、值、篩選四個區域，報表即時更新。</div><div class="si">例：地區 → 列 　產品 → 欄 　金額 → 值 　季度 → 篩選</div></div></div>
+      <div class="step"><div class="sn">5</div><div><div class="st">調整彙總方式（如需要）</div><div class="sd">「值」區域預設是加總（SUM）。右鍵點選數值欄位 → 值欄位設定，可改為計數、平均、百分比等。</div><div class="si">值欄位設定：加總 / 計數 / 平均值 / 最大值 / 最小值 / %</div></div></div>
+      <div class="step"><div class="sn">6</div><div><div class="st">美化格式（選擇性）</div><div class="sd">在「樞紐分析表設計」分頁選擇報表版面、套用樣式、顯示或隱藏總計列，讓報表更易閱讀。</div><div class="si">設計 → 樞紐分析表樣式 → 選擇喜歡的配色主題</div></div></div>
+    </div>
+    <div class="tip">💡 資料更新後：點選樞紐分析表任一儲存格 → 右鍵 → 重新整理（或快捷鍵 Alt+F5），報表即時同步。</div>
+  </div>
+</div>
+
+<div id="panel-zones" class="panel">
+  <div class="ph"><div class="badge">🗂️ 四大區域</div><h1>四大區域解析</h1><p class="desc">樞紐分析表的核心是四個欄位區域。理解每個區域的作用，就能自由組合出任何報表。</p></div>
+  <div class="pb2">
+    <div class="ccg">
+      <div class="cc" style="border-color:var(--acbd)"><div class="cc-i">📋</div><div class="cc-t">列（Rows）</div><div class="cc-d">決定報表「橫向分類」。放在這裡的欄位成為報表左側的列標籤，每個唯一值獨佔一列。</div><div style="margin-top:6px;font-size:12px;color:var(--t2)">常放：地區、部門、業務員、產品類別</div><div class="tag tb" style="margin-top:5px;font-size:11px">列標籤</div></div>
+      <div class="cc" style="border-color:var(--gbd)"><div class="cc-i">📐</div><div class="cc-t">欄（Columns）</div><div class="cc-d">決定報表「縱向分類」。放在這裡的欄位成為報表頂部的欄標籤，交叉產生矩陣式報表。</div><div style="margin-top:6px;font-size:12px;color:var(--t2)">常放：季度、年份（類別少的欄位）</div><div class="tag tg" style="margin-top:5px;font-size:11px">欄標籤</div></div>
+      <div class="cc" style="border-color:var(--pbd)"><div class="cc-i">🔢</div><div class="cc-t">值（Values）</div><div class="cc-d">要計算的數值欄位。支援加總、計數、平均、最大值、最小值、百分比等多種彙總方式。</div><div style="margin-top:6px;font-size:12px;color:var(--t2)">常放：金額、數量、利潤等數值欄位</div><div class="tag tp" style="margin-top:5px;font-size:11px">彙總數值</div></div>
+      <div class="cc" style="border-color:var(--abd)"><div class="cc-i">🔍</div><div class="cc-t">篩選（Filters）</div><div class="cc-d">報表頂部的全局篩選器。選擇特定值後，整個樞紐分析表都會篩選到只顯示該條件的資料。</div><div style="margin-top:6px;font-size:12px;color:var(--t2)">常放：年度、負責人等全局條件欄位</div><div class="tag ta" style="margin-top:5px;font-size:11px">全局篩選</div></div>
+    </div>
+    <h2>同一份資料，不同配置 → 不同報表</h2>
+    <div class="g3">
+      <div class="card cp"><h3 style="color:var(--ac)">配置 A：地區 × 產品</h3><div style="font-size:12px;color:var(--t2);margin-bottom:8px">列：地區，欄：產品，值：加總金額</div>
+        <table class="t" style="font-size:12px"><tr><th></th><th class="num">筆電</th><th class="num">手機</th><th class="num">平板</th></tr>
+        <tr><td>北區</td><td class="num">328K</td><td class="num">145K</td><td class="num">198K</td></tr>
+        <tr><td>中區</td><td class="num">256K</td><td class="num">189K</td><td class="num">122K</td></tr>
+        <tr><td>南區</td><td class="num">198K</td><td class="num">210K</td><td class="num">88K</td></tr></table></div>
+      <div class="card cp"><h3 style="color:var(--gr)">配置 B：產品 × 季度</h3><div style="font-size:12px;color:var(--t2);margin-bottom:8px">列：產品，欄：季度，值：加總金額</div>
+        <table class="t" style="font-size:12px"><tr><th></th><th class="num">Q1</th><th class="num">Q2</th><th class="num">Q3</th></tr>
+        <tr><td>筆電</td><td class="num">195K</td><td class="num">198K</td><td class="num">212K</td></tr>
+        <tr><td>手機</td><td class="num">132K</td><td class="num">148K</td><td class="num">159K</td></tr>
+        <tr><td>平板</td><td class="num">98K</td><td class="num">110K</td><td class="num">125K</td></tr></table></div>
+      <div class="card cp"><h3 style="color:var(--pu)">配置 C：業務員計數</h3><div style="font-size:12px;color:var(--t2);margin-bottom:8px">列：業務員，值：計數訂單</div>
+        <table class="t" style="font-size:12px"><tr><th>業務員</th><th class="num">訂單數</th><th class="num">業績%</th></tr>
+        <tr><td>王大明</td><td class="num">88</td><td class="num">31.2%</td></tr>
+        <tr><td>林小美</td><td class="num">75</td><td class="num">26.6%</td></tr>
+        <tr><td>陳志偉</td><td class="num">118</td><td class="num">42.2%</td></tr></table></div>
+    </div>
+    <div class="tip">💡 三種配置用的是同一份原始資料！只要在欄位面板拖來拖去，報表即時重組。這就是「Pivot（旋轉）」的精髓。</div>
+  </div>
+</div>
+
+<div id="panel-builder" class="panel">
+  <div class="ph"><div class="badge">🧩 互動建立器</div><h1>樞紐分析互動建立器</h1><p class="desc">拖曳欄位到四個區域，即時預覽樞紐分析結果。體驗真實的操作邏輯。</p></div>
+  <div class="pb2">
+    <div class="agg">
+      <span style="font-size:12px;color:var(--t2);padding:4px 0">彙總方式：</span>
+      <button class="ab on" onclick="setAgg('sum',this)">加總</button>
+      <button class="ab" onclick="setAgg('avg',this)">平均值</button>
+      <button class="ab" onclick="setAgg('count',this)">計數</button>
+      <button class="ab" onclick="setAgg('max',this)">最大值</button>
+      <button class="ab" onclick="setAgg('min',this)">最小值</button>
+    </div>
+    <div class="bw">
+      <div class="fp"><h3>可用欄位</h3><div id="fp"></div></div>
+      <div>
+        <div class="zones">
+          <div class="zone" id="z-row" ondragover="dov(event,'row')" ondrop="drp(event,'row')" ondragleave="dlv(event,'row')"><div class="zl">📋 列（Rows）</div><div id="c-row"></div></div>
+          <div class="zone" id="z-col" ondragover="dov(event,'col')" ondrop="drp(event,'col')" ondragleave="dlv(event,'col')"><div class="zl">📐 欄（Columns）</div><div id="c-col"></div></div>
+          <div class="zone" id="z-val" ondragover="dov(event,'val')" ondrop="drp(event,'val')" ondragleave="dlv(event,'val')"><div class="zl">🔢 值（Values）</div><div id="c-val"></div></div>
+          <div class="zone" id="z-flt" ondragover="dov(event,'flt')" ondrop="drp(event,'flt')" ondragleave="dlv(event,'flt')"><div class="zl">🔍 篩選（Filters）</div><div id="c-flt"></div></div>
+        </div>
+        <div class="pout" id="pout"><div class="pph">← 將欄位拖曳到上方四個區域，即時預覽樞紐分析結果</div></div>
+      </div>
+    </div>
+    <div class="info" style="margin-top:12px">ℹ️ 將欄位從「可用欄位」拖曳到任一區域；點擊區域內的 ✕ 可移除欄位。</div>
+  </div>
+</div>
+
+<div id="panel-agg" class="panel">
+  <div class="ph"><div class="badge">🔢 彙總方式</div><h1>彙總方式大全</h1><p class="desc">值區域不只有「加總」，根據分析目的選擇合適的彙總方式，能揭露不同的洞察。</p></div>
+  <div class="pb2">
+    <div class="tw"><table class="t">
+      <tr><th>彙總方式</th><th>用途說明</th><th>適用場景</th><th>設定路徑</th></tr>
+      <tr><td><span class="tag tb">加總 SUM</span></td><td>所有數值的總和</td><td>銷售總額、總費用</td><td style="font-family:var(--mono);font-size:11px">預設</td></tr>
+      <tr><td><span class="tag tg">計數 COUNT</span></td><td>有值的儲存格數量</td><td>訂單筆數、員工人數</td><td style="font-family:var(--mono);font-size:11px">值欄位設定</td></tr>
+      <tr><td><span class="tag tp">平均值 AVG</span></td><td>所有數值的平均</td><td>平均客單價、平均薪資</td><td style="font-family:var(--mono);font-size:11px">值欄位設定</td></tr>
+      <tr><td><span class="tag ta">最大值 MAX</span></td><td>範圍內最大的數值</td><td>最高業績、最高分數</td><td style="font-family:var(--mono);font-size:11px">值欄位設定</td></tr>
+      <tr><td><span class="tag" style="background:var(--rbg);color:var(--re);border:1px solid var(--rbd)">最小值 MIN</span></td><td>範圍內最小的數值</td><td>最低售價、最短工時</td><td style="font-family:var(--mono);font-size:11px">值欄位設定</td></tr>
+      <tr><td><span class="tag" style="background:#f0fdf4;color:#14532d;border:1px solid #86efac">佔比 %</span></td><td>各項目佔總計的百分比</td><td>各地區佔總銷售比</td><td style="font-family:var(--mono);font-size:11px">顯示為→總計%</td></tr>
+      <tr><td><span class="tag" style="background:#faf5ff;color:#6b21a8;border:1px solid #d8b4fe">差異 DIFF</span></td><td>與參照項目的差異</td><td>vs 上月、vs 上年同期</td><td style="font-family:var(--mono);font-size:11px">顯示為→差異</td></tr>
+      <tr><td><span class="tag" style="background:#fff7ed;color:#7c2d12;border:1px solid #fdba74">累積 RUNNING</span></td><td>累積加總 Running Total</td><td>年度累積業績</td><td style="font-family:var(--mono);font-size:11px">顯示為→累積加總</td></tr>
+    </table></div>
+    <h2>百分比彙總實例</h2>
+    <div class="g2">
+      <div><h3>一般加總</h3><div class="tw" style="margin-top:7px"><table class="t"><tr><th>地區</th><th class="num">銷售額</th></tr><tr><td>北區</td><td class="num">671,000</td></tr><tr><td>中區</td><td class="num">567,000</td></tr><tr><td>南區</td><td class="num">496,000</td></tr><tr style="font-weight:700"><td>總計</td><td class="num">1,734,000</td></tr></table></div></div>
+      <div><h3>改為「總計的百分比」</h3><div class="tw" style="margin-top:7px"><table class="t"><tr><th>地區</th><th class="num">佔比</th></tr><tr><td>北區</td><td class="num">38.7%</td></tr><tr><td>中區</td><td class="num">32.7%</td></tr><tr><td>南區</td><td class="num">28.6%</td></tr><tr style="font-weight:700"><td>總計</td><td class="num">100.0%</td></tr></table></div></div>
+    </div>
+    <div class="tip">💡 設定路徑：右鍵點選值欄位 → 值欄位設定 → 「顯示值的方式」分頁 → 選「總計的百分比」，無需公式！</div>
+  </div>
+</div>
+
+<div id="panel-group" class="panel">
+  <div class="ph"><div class="badge">📅 群組分析</div><h1>群組與日期分析</h1><p class="desc">「群組」功能可自動將日期聚合為月、季、年，或將數字分成自訂區間。</p></div>
+  <div class="pb2">
+    <h2>日期自動群組</h2>
+    <div class="g2">
+      <div class="card cp"><h3>原始日期（每天一列）</h3><table class="t" style="margin-top:7px;font-size:12px"><tr><th>日期</th><th class="num">銷售額</th></tr><tr><td>2024/01/05</td><td class="num">38,000</td></tr><tr><td>2024/01/08</td><td class="num">15,900</td></tr><tr><td>2024/01/12</td><td class="num">22,000</td></tr><tr><td style="color:var(--t3)">… 360筆</td><td></td></tr></table></div>
+      <div class="card cp"><h3>群組後（聚合為月份）</h3><table class="t" style="margin-top:7px;font-size:12px"><tr><th>月份</th><th class="num">銷售額</th></tr><tr><td>2024年1月</td><td class="num">248,500</td></tr><tr><td>2024年2月</td><td class="num">219,800</td></tr><tr><td>2024年3月</td><td class="num">285,200</td></tr><tr><td style="color:var(--t3)">… 12月</td><td></td></tr></table></div>
+    </div>
+    <div class="tip">💡 日期群組：右鍵點選日期欄位 → 群組 → 選擇「月」「季」「年」，可同時多選建立年▶季▶月的階層結構。</div>
+    <h2>數字區間群組</h2>
+    <div class="g2">
+      <div class="card cp"><h3 style="margin-bottom:8px">薪資區間分析</h3><div style="font-size:12px;color:var(--t2);margin-bottom:8px">起始 40000、結束 80000、間距 10000</div>
+        <table class="t" style="font-size:12px"><tr><th>薪資區間</th><th class="num">人數</th><th class="num">佔比</th></tr><tr><td>40000-49999</td><td class="num">8</td><td class="num">26.7%</td></tr><tr><td>50000-59999</td><td class="num">11</td><td class="num">36.7%</td></tr><tr><td>60000-69999</td><td class="num">7</td><td class="num">23.3%</td></tr><tr><td>70000-79999</td><td class="num">4</td><td class="num">13.3%</td></tr><tr style="font-weight:700"><td>總計</td><td class="num">30</td><td class="num">100%</td></tr></table></div>
+      <div class="card cp"><h3 style="margin-bottom:8px">客單價區間</h3><div style="font-size:12px;color:var(--t2);margin-bottom:8px">分析訂單金額分布</div>
+        <table class="t" style="font-size:12px"><tr><th>客單價</th><th class="num">訂單數</th></tr><tr><td>0-5,000</td><td class="num">125</td></tr><tr><td>5,001-15,000</td><td class="num">89</td></tr><tr><td>15,001-30,000</td><td class="num">47</td></tr><tr><td>30,001+</td><td class="num">18</td></tr></table></div>
+    </div>
+    <div class="warn">⚠️ 數字群組前確保欄位全部是數字格式，混有文字的儲存格無法進行群組操作。</div>
+  </div>
+</div>
+
+<div id="panel-slicer" class="panel">
+  <div class="ph"><div class="badge">🎛️ 交叉分析篩選器</div><h1>交叉分析篩選器（Slicer）</h1><p class="desc">Slicer 用按鈕取代下拉篩選，讓報表變成可互動的儀表板，是製作 Excel Dashboard 的關鍵功能。</p></div>
+  <div class="pb2">
+    <h2>互動示範 — 點選篩選條件</h2>
+    <div class="slw">
+      <div class="slb"><div class="slt">地區</div>
+        <button class="sbt on" onclick="tgSl(this,'region','全部')">全部</button>
+        <button class="sbt" onclick="tgSl(this,'region','北區')">北區</button>
+        <button class="sbt" onclick="tgSl(this,'region','中區')">中區</button>
+        <button class="sbt" onclick="tgSl(this,'region','南區')">南區</button>
+      </div>
+      <div class="slb"><div class="slt">產品</div>
+        <button class="sbt on" onclick="tgSl(this,'product','全部')">全部</button>
+        <button class="sbt" onclick="tgSl(this,'product','筆電')">筆電</button>
+        <button class="sbt" onclick="tgSl(this,'product','手機')">手機</button>
+        <button class="sbt" onclick="tgSl(this,'product','平板')">平板</button>
+      </div>
+      <div class="slb"><div class="slt">季度</div>
+        <button class="sbt on" onclick="tgSl(this,'quarter','全部')">全部</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q1')">Q1</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q2')">Q2</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q3')">Q3</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q4')">Q4</button>
+      </div>
+    </div>
+    <div id="sl-r" class="tw"></div>
+    <h2>新增 Slicer 步驟</h2>
+    <div class="steps">
+      <div class="step"><div class="sn">1</div><div><div class="st">點選樞紐分析表任一儲存格</div><div class="sd">必須先選到樞紐分析表，才能插入屬於它的 Slicer。</div></div></div>
+      <div class="step"><div class="sn">2</div><div><div class="st">樞紐分析表分析 → 插入交叉分析篩選器</div><div class="sd">勾選要做成按鈕的欄位（可多選），確定後出現浮動的 Slicer 元件。</div></div></div>
+      <div class="step"><div class="sn">3</div><div><div class="st">排列位置，調整欄數與樣式</div><div class="sd">拖曳 Slicer 到合適位置，調整欄數讓按鈕橫排，在格式分頁自訂顏色。</div></div></div>
+    </div>
+    <div class="tip">💡 一個 Slicer 可以同時控制多個樞紐分析表！右鍵 Slicer → 報表連結，完成儀表板互動效果。</div>
+  </div>
+</div>
+
+<div id="panel-calc" class="panel">
+  <div class="ph"><div class="badge">⚙️ 計算欄位</div><h1>計算欄位與計算項目</h1><p class="desc">樞紐分析表內建「計算欄位」，可在裡面寫公式，讓彙總後的資料再做一層運算。</p></div>
+  <div class="pb2">
+    <h2>計算欄位（Calculated Field）</h2>
+    <div class="info">ℹ️ 計算欄位是在原始欄位之間建立新的計算關係，例如用「金額」÷「數量」算出「平均單價」，不需修改原始資料。</div>
+    <div class="g2">
+      <div class="card cp"><h3>常見計算欄位範例</h3>
+        <div class="fb"><span class="cm">// 利潤率</span><br>= <span class="fn">利潤</span> / <span class="fn">銷售額</span><br><br><span class="cm">// 平均客單價</span><br>= <span class="fn">金額</span> / <span class="fn">訂單數</span><br><br><span class="cm">// 稅後金額（含稅5%）</span><br>= <span class="fn">金額</span> * <span class="s">1.05</span></div>
+      </div>
+      <div class="card cp"><h3>新增步驟</h3>
+        <div class="steps" style="margin-top:7px">
+          <div class="step" style="padding:8px 0"><div class="sn" style="width:22px;height:22px;font-size:11px">1</div><div class="sd" style="font-size:12.5px">點選樞紐分析表任一儲存格</div></div>
+          <div class="step" style="padding:8px 0"><div class="sn" style="width:22px;height:22px;font-size:11px">2</div><div class="sd" style="font-size:12.5px">樞紐分析表分析 → 欄位、項目及集合 → 計算欄位</div></div>
+          <div class="step" style="padding:8px 0"><div class="sn" style="width:22px;height:22px;font-size:11px">3</div><div class="sd" style="font-size:12.5px">輸入名稱（如「利潤率」），公式欄輸入 = 利潤/銷售額</div></div>
+          <div class="step" style="border:none;padding:8px 0"><div class="sn" style="width:22px;height:22px;font-size:11px">4</div><div class="sd" style="font-size:12.5px">按「新增」→「確定」，新欄位出現在欄位清單中</div></div>
+        </div>
+      </div>
+    </div>
+    <h2>計算項目（Calculated Item）</h2>
+    <div class="info">ℹ️ 計算項目是對列/欄標籤的項目做計算，例如將「北區」+「中區」合併成「北中合計」新項目。</div>
+    <div class="tw" style="margin-top:7px"><table class="t">
+      <tr><th>地區</th><th class="num">銷售額</th><th>說明</th></tr>
+      <tr><td>北區</td><td class="num">671,000</td><td style="font-size:12px;color:var(--t2)">原始項目</td></tr>
+      <tr><td>中區</td><td class="num">567,000</td><td style="font-size:12px;color:var(--t2)">原始項目</td></tr>
+      <tr><td>南區</td><td class="num">496,000</td><td style="font-size:12px;color:var(--t2)">原始項目</td></tr>
+      <tr style="background:var(--acbg)"><td style="color:var(--ac);font-weight:600">北中合計</td><td class="num" style="color:var(--ac)">1,238,000</td><td style="font-size:12px;color:var(--ac)">計算項目：= 北區 + 中區</td></tr>
+    </table></div>
+    <div class="warn">⚠️ 計算項目可能與總計列發生重複計算。建議關閉總計列：設計 → 總計 → 關閉列和欄。</div>
+  </div>
+</div>
+
+<div id="panel-charts" class="panel">
+  <div class="ph"><div class="badge">📈 視覺化</div><h1>樞紐圖表分析</h1><p class="desc">以下圖表模擬真實樞紐分析的各類視覺化報表，點選切換不同分析視角。</p></div>
+  <div class="pb2">
+    <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
+      <button class="ab on" onclick="scv('sales',this)">銷售分析</button>
+      <button class="ab" onclick="scv('trend',this)">趨勢分析</button>
+      <button class="ab" onclick="scv('ratio',this)">佔比分析</button>
+      <button class="ab" onclick="scv('perf',this)">績效分析</button>
+    </div>
+    <div id="cv-sales">
+      <div class="g2">
+        <div class="chc"><h3>各地區銷售額</h3><div style="height:210px"><canvas id="c1"></canvas></div></div>
+        <div class="chc"><h3>產品銷售分布</h3><div style="height:210px"><canvas id="c2"></canvas></div></div>
+        <div class="chc full"><h3>地區 × 產品 交叉分析</h3><div style="height:210px"><canvas id="c3"></canvas></div></div>
+      </div>
+    </div>
+    <div id="cv-trend" style="display:none">
+      <div class="chc" style="margin-bottom:12px"><h3>月度銷售趨勢</h3><div style="height:230px"><canvas id="c4"></canvas></div></div>
+      <div class="g2">
+        <div class="chc"><h3>季度成長率</h3><div style="height:190px"><canvas id="c5"></canvas></div></div>
+        <div class="chc"><h3>累積銷售額</h3><div style="height:190px"><canvas id="c6"></canvas></div></div>
+      </div>
+    </div>
+    <div id="cv-ratio" style="display:none">
+      <div class="g2">
+        <div class="chc"><h3>各地區佔比</h3><div style="height:220px"><canvas id="c7"></canvas></div></div>
+        <div class="chc"><h3>產品類別佔比</h3><div style="height:220px"><canvas id="c8"></canvas></div></div>
+      </div>
+    </div>
+    <div id="cv-perf" style="display:none">
+      <div class="chc" style="margin-bottom:12px"><h3>業務員績效雷達圖</h3><div style="height:270px"><canvas id="c9"></canvas></div></div>
+      <div class="chc"><h3>目標達成率</h3><div style="height:190px"><canvas id="c10"></canvas></div></div>
+    </div>
+    <div class="tip" style="margin-top:12px">💡 建立樞紐圖表：選取樞紐分析表 → 樞紐分析表分析 → 樞紐圖表，選圖表類型，圖表會與表格同步自動更新。</div>
+  </div>
+</div>
+
+<div id="panel-vs" class="panel">
+  <div class="ph"><div class="badge">⚖️ 比較</div><h1>樞紐分析 vs 一般函式</h1><p class="desc">樞紐分析和 SUMIFS/COUNTIFS 各有優勢，了解差異選擇最適合的工具。</p></div>
+  <div class="pb2">
+    <div class="vsg">
+      <div class="vc ac">
+        <div class="vt">🔄 樞紐分析表 <span class="tag tg" style="font-size:11px">推薦探索用</span></div>
+        <div class="vi"><span class="gd">✓</span>不需公式，拖曳即可</div>
+        <div class="vi"><span class="gd">✓</span>秒速切換報表結構</div>
+        <div class="vi"><span class="gd">✓</span>自動處理所有分類</div>
+        <div class="vi"><span class="gd">✓</span>搭配 Slicer 做儀表板</div>
+        <div class="vi"><span class="gd">✓</span>資料更新只需重新整理</div>
+        <div class="vi"><span class="bd2">✗</span>結果不能被其他公式引用</div>
+        <div class="vi"><span class="bd2">✗</span>格式難以完全自訂</div>
+        <div class="vi"><span class="bd2">✗</span>版面位置相對固定</div>
+      </div>
+      <div class="vc">
+        <div class="vt">📐 SUMIFS / COUNTIFS <span class="tag ta" style="font-size:11px">推薦固定報表</span></div>
+        <div class="vi"><span class="gd">✓</span>結果可被其他公式引用</div>
+        <div class="vi"><span class="gd">✓</span>版面完全自由設計</div>
+        <div class="vi"><span class="gd">✓</span>可整合到既有報告模板</div>
+        <div class="vi"><span class="gd">✓</span>支援複雜 AND/OR 條件</div>
+        <div class="vi"><span class="bd2">✗</span>每格都要手動寫公式</div>
+        <div class="vi"><span class="bd2">✗</span>新增分類時公式要跟著改</div>
+        <div class="vi"><span class="bd2">✗</span>無法快速切換分析角度</div>
+        <div class="vi"><span class="bd2">✗</span>大量條件下公式很複雜</div>
+      </div>
+    </div>
+    <h2>相同任務，兩種做法</h2>
+    <div class="card cp">
+      <h3 style="margin-bottom:8px">任務：算出北區筆電 Q1 的銷售總額</h3>
+      <div style="font-size:13px;color:var(--t2);margin-bottom:6px">方法 A — SUMIFS 公式（固定一格）：</div>
+      <div class="fb">=<span class="fn">SUMIFS</span>(<span class="s">金額</span>, <span class="s">地區</span>, <span class="fn">"北區"</span>, <span class="s">產品</span>, <span class="fn">"筆電"</span>, <span class="s">季度</span>, <span class="fn">"Q1"</span>)</div>
+      <div style="font-size:13px;color:var(--t2);margin:10px 0 5px">方法 B — 樞紐分析（自動產生所有組合）：</div>
+      <div class="si">列：地區（北/中/南）　欄：產品（筆電/手機/平板）　篩選：季度=Q1<br>→ 自動產生 3×3 = 9格完整交叉報表，無需寫任何公式</div>
+    </div>
+    <div class="info" style="margin-top:12px">ℹ️ 建議原則：資料探索、主管簡報、一次性分析 → 用樞紐分析。固定格式報告、需要引用結果、複雜邏輯 → 用函式。</div>
+  </div>
+</div>
+
+<div id="panel-quiz" class="panel">
+  <div class="ph"><div class="badge">🎯 測驗挑戰</div><h1>樞紐分析測驗</h1><p class="desc">10 道題目，測試你對樞紐分析的掌握程度。</p></div>
+  <div class="pb2">
+    <div class="qh"><div class="qp"><span id="qA">0</span> / 10 已作答</div><div class="qp">正確 <span id="qC">0</span></div></div>
+    <div id="qa"></div>
+    <button class="qnb" id="qnb" style="display:none" onclick="nextQ()">下一題 →</button>
+  </div>
+</div>
+
+</div></div>
+<script>
+function go(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
+  document.getElementById('panel-'+id).classList.add('on');
+  el.classList.add('on');
+  if(id==='charts') iC();
+  if(id==='quiz'&&!qList.length) sQ();
+  if(id==='builder') iB();
+  if(id==='slicer') rSl();
+}
+const FD=[{id:'region',l:'地區',i:'🗺️'},{id:'product',l:'產品',i:'📦'},{id:'rep',l:'業務員',i:'👤'},{id:'quarter',l:'季度',i:'📅'},{id:'amount',l:'金額',i:'💰'},{id:'qty',l:'數量',i:'🔢'},{id:'profit',l:'利潤',i:'📈'}];
+const RD=[{region:'北區',product:'筆電',rep:'王大明',quarter:'Q1',amount:328000,qty:28,profit:82000},{region:'北區',product:'手機',rep:'王大明',quarter:'Q1',amount:145000,qty:45,profit:36250},{region:'北區',product:'平板',rep:'陳志偉',quarter:'Q1',amount:198000,qty:18,profit:49500},{region:'中區',product:'筆電',rep:'林小美',quarter:'Q2',amount:256000,qty:22,profit:64000},{region:'中區',product:'手機',rep:'林小美',quarter:'Q2',amount:189000,qty:58,profit:47250},{region:'中區',product:'平板',rep:'張雅婷',quarter:'Q2',amount:122000,qty:11,profit:30500},{region:'南區',product:'筆電',rep:'張雅婷',quarter:'Q3',amount:198000,qty:17,profit:49500},{region:'南區',product:'手機',rep:'陳志偉',quarter:'Q3',amount:210000,qty:65,profit:52500},{region:'南區',product:'平板',rep:'王大明',quarter:'Q4',amount:88000,qty:8,profit:22000},{region:'北區',product:'筆電',rep:'陳志偉',quarter:'Q4',amount:412000,qty:35,profit:103000},{region:'中區',product:'手機',rep:'王大明',quarter:'Q4',amount:234000,qty:72,profit:58500},{region:'南區',product:'平板',rep:'林小美',quarter:'Q3',amount:155000,qty:14,profit:38750}];
+let zs={row:[],col:[],val:[],flt:[]},cAgg='sum',bOk=false;
+function iB(){if(bOk)return;bOk=true;const p=document.getElementById('fp');p.innerHTML='';FD.forEach(f=>{const d=document.createElement('div');d.className='fi';d.draggable=true;d.dataset.id=f.id;d.innerHTML=f.i+' '+f.l;d.addEventListener('dragstart',e=>{e.dataTransfer.setData('fid',f.id);d.classList.add('dr');});d.addEventListener('dragend',()=>d.classList.remove('dr'));p.appendChild(d);});}
+function setAgg(a,el){cAgg=a;document.querySelectorAll('#panel-builder .ab').forEach(b=>b.classList.remove('on'));el.classList.add('on');rPiv();}
+function dov(e,z){e.preventDefault();document.getElementById('z-'+z).classList.add('dov');}
+function dlv(e,z){document.getElementById('z-'+z).classList.remove('dov');}
+function drp(e,z){e.preventDefault();dlv(e,z);const fid=e.dataTransfer.getData('fid');if(!fid)return;['row','col','val','flt'].forEach(zn=>{zs[zn]=zs[zn].filter(x=>x!==fid);});zs[z].push(fid);rChips();rPiv();}
+function rmC(fid,z){zs[z]=zs[z].filter(x=>x!==fid);rChips();rPiv();}
+function rChips(){const cls={row:'cr',col:'cc2',val:'cv',flt:'cf'};['row','col','val','flt'].forEach(z=>{document.getElementById('c-'+z).innerHTML=zs[z].map(fid=>{const f=FD.find(x=>x.id===fid);return '<span class="zc '+cls[z]+'">'+f.i+' '+f.l+'<span class="rm" onclick="rmC(''+fid+'',''+z+'')">✕</span></span>';}).join('');});}
+function aV(v){if(!v||!v.length)return null;if(cAgg==='sum')return v.reduce((a,b)=>a+b,0);if(cAgg==='avg')return Math.round(v.reduce((a,b)=>a+b,0)/v.length);if(cAgg==='count')return v.length;if(cAgg==='max')return Math.max(...v);if(cAgg==='min')return Math.min(...v);}
+function fV(v){if(v===null)return'';return cAgg==='count'?v:v.toLocaleString();}
+function rPiv(){const out=document.getElementById('pout');const rF=zs.row,cF=zs.col,vF=zs.val[0];if(!rF.length&&!vF){out.innerHTML='<div class="pph">← 拖曳至少一個列欄位和一個值欄位來產生報表</div>';return;}const rK=r=>rF.map(f=>r[f]).join('||');const cK=r=>cF.map(f=>r[f]).join('||');const rKs=[...new Set(RD.map(rK))].sort();const cKs=[...new Set(RD.map(cK))].sort();let h='<div class="ptw"><table class="pt"><tr><th>'+rF.map(f=>FD.find(x=>x.id===f).l).join('/')+'</th>';if(cF.length){cKs.forEach(ck=>h+='<th class="ch">'+ck+'</th>');if(vF)h+='<th class="ch">總計</th>';}else if(vF){h+='<th class="ch">'+FD.find(x=>x.id===vF).l+'</th>';}h+='</tr>';rKs.forEach(rk=>{const rd=RD.filter(r=>rK(r)===rk);h+='<tr><td class="rl">'+rk+'</td>';if(vF){if(cF.length){let rv=[];cKs.forEach(ck=>{const c=rd.filter(r=>cK(r)===ck).map(r=>r[vF]);const v=aV(c);rv.push(v||0);h+='<td>'+fV(v)+'</td>';});h+='<td style="font-weight:700">'+fV(aV(rv))+'</td>';}else{h+='<td>'+fV(aV(rd.map(r=>r[vF])))+'</td>';}}h+='</tr>';});if(vF&&rKs.length>1){h+='<tr class="gr"><td class="rl">總計</td>';if(cF.length){cKs.forEach(ck=>h+='<td>'+fV(aV(RD.filter(r=>cK(r)===ck).map(r=>r[vF])))+'</td>');h+='<td>'+fV(aV(RD.map(r=>r[vF])))+'</td>';}else h+='<td>'+fV(aV(RD.map(r=>r[vF])))+'</td>';h+='</tr>';}h+='</table></div>';out.innerHTML=h;}
+const SD={北區:{筆電:{Q1:195000,Q2:198000,Q3:178000,Q4:412000},手機:{Q1:88000,Q2:92000,Q3:102000,Q4:145000},平板:{Q1:198000,Q2:122000,Q3:88000,Q4:155000}},中區:{筆電:{Q1:120000,Q2:256000,Q3:145000,Q4:198000},手機:{Q1:110000,Q2:189000,Q3:125000,Q4:234000},平板:{Q1:68000,Q2:122000,Q3:88000,Q4:102000}},南區:{筆電:{Q1:88000,Q2:110000,Q3:198000,Q4:145000},手機:{Q1:125000,Q2:145000,Q3:210000,Q4:122000},平板:{Q1:55000,Q2:88000,Q3:155000,Q4:68000}}};
+let SS={region:'全部',product:'全部',quarter:'全部'};
+function tgSl(el,d,v){document.querySelectorAll('[onclick*="''+d+''"]').forEach(b=>b.classList.remove('on'));el.classList.add('on');SS[d]=v;rSl();}
+function rSl(){const rs=SS.region==='全部'?['北區','中區','南區']:[SS.region];const ps=SS.product==='全部'?['筆電','手機','平板']:[SS.product];const qs=SS.quarter==='全部'?['Q1','Q2','Q3','Q4']:[SS.quarter];let h='<table class="t"><tr><th>地區</th>';ps.forEach(p=>h+='<th class="num">'+p+'</th>');h+='<th class="num">小計</th></tr>';let gt=0;rs.forEach(r=>{h+='<tr><td><span class="tag tb">'+r+'</span></td>';let rt=0;ps.forEach(p=>{let v=0;qs.forEach(q=>{v+=(SD[r]&&SD[r][p]&&SD[r][p][q])||0;});rt+=v;gt+=v;h+='<td class="num">'+v.toLocaleString()+'</td>';});h+='<td class="num" style="font-weight:700">'+rt.toLocaleString()+'</td></tr>';});h+='<tr style="font-weight:700"><td>總計</td>';ps.forEach(p=>{let v=0;rs.forEach(r=>qs.forEach(q=>{v+=(SD[r]&&SD[r][p]&&SD[r][p][q])||0;}));h+='<td class="num">'+v.toLocaleString()+'</td>';});h+='<td class="num">'+gt.toLocaleString()+'</td></tr></table>';document.getElementById('sl-r').innerHTML=h;}
+let cR=false;const P=['#2563eb','#059669','#d97706','#7c3aed','#dc2626'];
+function iC(){if(cR)return;cR=true;if(typeof Chart==='undefined'){setTimeout(iC,300);return;}Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';Chart.defaults.color='#64748b';Chart.defaults.plugins.legend.labels.boxWidth=12;
+new Chart(document.getElementById('c1'),{type:'bar',data:{labels:['北區','中區','南區'],datasets:[{label:'銷售額',data:[671000,567000,496000],backgroundColor:P.slice(0,3).map(c=>c+'cc'),borderColor:P.slice(0,3),borderWidth:1.5,borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v/1000+'K'},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+new Chart(document.getElementById('c2'),{type:'doughnut',data:{labels:['筆電','手機','平板'],datasets:[{data:[782000,544000,408000],backgroundColor:P.slice(0,3),borderWidth:3,borderColor:'#fff'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'58%'}});
+new Chart(document.getElementById('c3'),{type:'bar',data:{labels:['北區','中區','南區'],datasets:[{label:'筆電',data:[328000,256000,198000],backgroundColor:'rgba(37,99,235,.7)',borderRadius:4},{label:'手機',data:[145000,189000,210000],backgroundColor:'rgba(5,150,105,.7)',borderRadius:4},{label:'平板',data:[198000,122000,88000],backgroundColor:'rgba(217,119,6,.7)',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v/1000+'K'},grid:{color:'rgba(0,0,0,0.05)'}}}}});
+const m=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];const ms=[148500,132000,168200,155400,178800,182100,175500,194300,206100,181800,193500,228500];
+new Chart(document.getElementById('c4'),{type:'line',data:{labels:m,datasets:[{label:'月銷售額',data:ms,borderColor:'#2563eb',backgroundColor:'rgba(37,99,235,0.07)',borderWidth:2.5,fill:true,tension:.4,pointRadius:4},{label:'目標線',data:Array(12).fill(170000),borderColor:'#dc2626',borderWidth:1.5,borderDash:[6,4],pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>v/1000+'K'},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+new Chart(document.getElementById('c5'),{type:'bar',data:{labels:['Q1→Q2','Q2→Q3','Q3→Q4'],datasets:[{label:'成長率%',data:[8.5,12.2,18.6],backgroundColor:['rgba(37,99,235,.7)','rgba(5,150,105,.7)','rgba(124,58,237,.7)'],borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+const cum=ms.reduce((a,v,i)=>{a.push((a[i-1]||0)+v);return a;},[]);
+new Chart(document.getElementById('c6'),{type:'line',data:{labels:m,datasets:[{label:'累積',data:cum,borderColor:'#7c3aed',backgroundColor:'rgba(124,58,237,0.09)',borderWidth:2,fill:true,tension:.4,pointRadius:3}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>v/10000+'萬'},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+new Chart(document.getElementById('c7'),{type:'bar',data:{labels:['北區','中區','南區'],datasets:[{label:'佔比',data:[38.7,32.7,28.6],backgroundColor:P.slice(0,3).map(c=>c+'bb'),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{max:50,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},x:{grid:{display:false}}}}});
+new Chart(document.getElementById('c8'),{type:'polarArea',data:{labels:['筆電','手機','平板'],datasets:[{data:[45.1,31.4,23.5],backgroundColor:P.slice(0,3).map(c=>c+'99')}]},options:{responsive:true,maintainAspectRatio:false}});
+new Chart(document.getElementById('c9'),{type:'radar',data:{labels:['銷售額','訂單數','客單價','達成率','回購率'],datasets:[{label:'王大明',data:[88,72,85,90,78],borderColor:P[0],backgroundColor:'rgba(37,99,235,0.09)',borderWidth:2,pointRadius:4},{label:'林小美',data:[72,85,68,75,88],borderColor:P[1],backgroundColor:'rgba(5,150,105,0.09)',borderWidth:2,pointRadius:4},{label:'陳志偉',data:[95,65,90,88,72],borderColor:P[2],backgroundColor:'rgba(217,119,6,0.09)',borderWidth:2,pointRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:25,font:{size:9}},grid:{color:'rgba(0,0,0,0.07)'},pointLabels:{font:{size:12}}}}}});
+new Chart(document.getElementById('c10'),{type:'bar',data:{labels:['王大明','林小美','陳志偉','張雅婷','黃建國'],datasets:[{label:'達成率',data:[112,94,108,88,76],backgroundColor:[112,94,108,88,76].map(v=>v>=100?'rgba(5,150,105,.75)':'rgba(37,99,235,.75)'),borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{max:130,ticks:{callback:v=>v+'%'},grid:{color:'rgba(0,0,0,0.05)'}},y:{grid:{display:false}}}}});
+}
+function scv(id,el){document.querySelectorAll('[id^="cv-"]').forEach(v=>v.style.display='none');document.getElementById('cv-'+id).style.display='block';document.querySelectorAll('#panel-charts .ab').forEach(b=>b.classList.remove('on'));el.classList.add('on');}
+const QS=[{q:'「列（Rows）」區域的作用是什麼？',opts:['決定報表頂部的標題欄','決定報表左側的分類列','要計算的數值欄位','全局篩選條件'],ans:1,exp:'列區域的欄位會成為報表左側的「列標籤」，每個唯一值獨佔一列。'},{q:'值（Values）區域預設的彙總方式是什麼？',opts:['計數（COUNT）','平均值（AVERAGE）','加總（SUM）','最大值（MAX）'],ans:2,exp:'值區域預設使用「加總（SUM）」。若欄位是文字，Excel 會自動改用「計數（COUNT）」。'},{q:'哪個問題會導致樞紐分析表無法正確運作？',opts:['資料超過1000筆','欄位標題列有合併儲存格','有重複的資料列','數字有小數點'],ans:1,exp:'合併儲存格的標題無法被識別為獨立欄位名稱，讓欄位清單出現異常或空白。'},{q:'原始資料更新後，如何讓樞紐分析表同步？',opts:['刪除重新建立','右鍵 → 重新整理（Alt+F5）','存檔重新開啟','按 Ctrl+Z 再重做'],ans:1,exp:'需要右鍵點選 → 重新整理，或使用快捷鍵 Alt+F5，樞紐分析表不會自動更新。'},{q:'「顯示值的方式 → 總計的百分比」會顯示什麼？',opts:['佔所在列的百分比','佔所在欄的百分比','佔全部總計的百分比','與前一格的差異'],ans:2,exp:'每個數值除以報表右下角的「總計」，顯示在整體中的佔比。'},{q:'交叉分析篩選器（Slicer）的最大優勢？',opts:['比下拉篩選速度更快','一個 Slicer 可控制多個樞紐分析表','可篩選 10 個以上條件','自動排除重複值'],ans:1,exp:'右鍵 Slicer → 報表連結，可同時控制多個樞紐分析表，是製作儀表板的關鍵。'},{q:'「計算欄位」是什麼？',opts:['原始資料中新增一欄','在樞紐分析表內用現有欄位建立的公式','Excel 自動計算的欄位','用 SUMIFS 加入的欄位'],ans:1,exp:'計算欄位在樞紐分析表欄位面板內定義，如「= 利潤 / 銷售額」，不需修改原始資料。'},{q:'如何將每日資料的日期欄聚合為月份？',opts:['在原始資料新增「月份」欄','右鍵點選日期欄位 → 群組 → 選月','在篩選器中只選特定月份','用計算欄位 = MONTH(日期)'],ans:1,exp:'右鍵點選樞紐分析表中的日期欄位，選「群組」，可選月、季、年等，可多選建立階層。'},{q:'何種情境最適合用樞紐分析而非 SUMIFS？',opts:['固定格式月報表需嵌入公式','需要將結果引用到其他儲存格','快速探索新資料切換分析視角','有複雜的 AND/OR 條件'],ans:2,exp:'樞紐分析的核心優勢是「快速探索」。需固定格式、引用結果時，SUMIFS 更合適。'},{q:'以下哪種資料格式對樞紐分析最友善？',opts:['每個月份一個工作表','橫向排列（每欄一個月份）','縱向明細表（每列一筆記錄）','已有小計和總計的彙總表'],ans:2,exp:'樞紐分析需要「平坦明細資料」：每列一筆記錄、每欄一個欄位、沒有小計列和合併儲存格。'}];
+let qList=[],qIdx=0,qAns=0,qCor=0;
+function sQ(){qList=[...QS].sort(()=>Math.random()-.5);qIdx=qAns=qCor=0;uS();rQ();}
+function uS(){document.getElementById('qA').textContent=qAns;document.getElementById('qC').textContent=qCor;}
+function rQ(){document.getElementById('qnb').style.display='none';if(qIdx>=qList.length){document.getElementById('qa').innerHTML='<div class="done"><div style="font-size:13px;color:var(--t2)">測驗完成！</div><div class="ds">'+qCor+'<span style="font-size:24px;color:var(--t2)"> / '+QS.length+'</span></div><div class="db">'+(qCor>=8?'優秀！你已掌握樞紐分析的核心概念':qCor>=6?'不錯！再複習幾個細節就完美了':'繼續加油，多操作幾次就會熟練！')+'</div><button class="rb" onclick="sQ()">重新測驗</button></div>';return;}const q=qList[qIdx];document.getElementById('qa').innerHTML='<div class="qc"><div class="qn">第 '+(qIdx+1)+' / '+QS.length+' 題</div><div class="qq">'+q.q+'</div><div class="qow">'+q.opts.map((o,i)=>'<button class="qo" onclick="aqQ('+i+')">'+String.fromCharCode(65+i)+'. '+o+'</button>').join('')+'</div><div id="qe"></div></div>';}
+function aqQ(i){const q=qList[qIdx];document.querySelectorAll('.qo').forEach(b=>b.disabled=true);const ok=i===q.ans;document.querySelectorAll('.qo')[i].classList.add(ok?'ok':'no');if(!ok)document.querySelectorAll('.qo')[q.ans].classList.add('ok');qAns++;if(ok)qCor++;uS();document.getElementById('qe').innerHTML='<div class="qe">'+(ok?'✓ 答對了！ ':'✗ 答錯了。')+q.exp+'</div>';document.getElementById('qnb').style.display='inline-block';}
+function nextQ(){qIdx++;rQ();}
+function dlXL(){
+  if(typeof XLSX==='undefined'){alert('正在載入，請稍後再試');return;}
+  const pw=document.getElementById('pw'),pb=document.getElementById('pb');pw.style.display='block';pb.style.width='20%';setTimeout(()=>{pb.style.width='65%';},100);
+  const wb=XLSX.utils.book_new();
+  const raw=[['訂單編號','日期','業務員','地區','產品','季度','數量','單價','金額','利潤'],['ORD001','2024/01/05','王大明','北區','筆電','Q1',3,38000,114000,28500],['ORD002','2024/01/08','林小美','南區','手機','Q1',5,15900,79500,19875],['ORD003','2024/01/12','陳志偉','北區','平板','Q1',2,22000,44000,11000],['ORD004','2024/01/15','王大明','中區','筆電','Q1',2,41000,82000,20500],['ORD005','2024/01/20','張雅婷','南區','手機','Q1',8,14900,119200,29800],['ORD006','2024/02/03','陳志偉','北區','筆電','Q1',4,39500,158000,39500],['ORD007','2024/02/10','林小美','中區','平板','Q1',3,20000,60000,15000],['ORD008','2024/02/18','王大明','南區','筆電','Q1',2,42000,84000,21000],['ORD009','2024/03/05','張雅婷','北區','手機','Q1',10,15200,152000,38000],['ORD010','2024/03/15','陳志偉','中區','筆電','Q2',3,40000,120000,30000],['ORD011','2024/04/08','王大明','北區','手機','Q2',6,16000,96000,24000],['ORD012','2024/04/20','林小美','南區','平板','Q2',4,21500,86000,21500],['ORD013','2024/05/12','張雅婷','中區','手機','Q2',9,15800,142200,35550],['ORD014','2024/05/25','陳志偉','北區','平板','Q2',5,22500,112500,28125],['ORD015','2024/06/10','王大明','南區','筆電','Q2',3,43000,129000,32250],['ORD016','2024/07/05','林小美','北區','筆電','Q3',4,41500,166000,41500],['ORD017','2024/07/18','張雅婷','中區','手機','Q3',12,15500,186000,46500],['ORD018','2024/08/09','陳志偉','南區','平板','Q3',6,23000,138000,34500],['ORD019','2024/08/22','王大明','北區','手機','Q3',8,16200,129600,32400],['ORD020','2024/09/15','林小美','南區','筆電','Q3',2,44000,88000,22000],['ORD021','2024/10/08','張雅婷','中區','筆電','Q4',5,42500,212500,53125],['ORD022','2024/10/20','陳志偉','北區','手機','Q4',15,15900,238500,59625],['ORD023','2024/11/05','王大明','南區','平板','Q4',7,24000,168000,42000],['ORD024','2024/11/18','林小美','中區','筆電','Q4',3,43500,130500,32625],['ORD025','2024/12/10','張雅婷','北區','平板','Q4',4,22000,88000,22000]];
+  const ws1=XLSX.utils.aoa_to_sheet(raw);ws1['!cols']=[{wch:10},{wch:12},{wch:8},{wch:6},{wch:6},{wch:6},{wch:6},{wch:8},{wch:10},{wch:8}];
+  XLSX.utils.book_append_sheet(wb,ws1,'銷售明細（原始資料）');
+  const guide=[['步驟','操作說明','預期結果'],['1','點選「銷售明細」工作表中任一有資料的儲存格','游標位於 A1~J26 範圍內'],['2','功能區 → 插入 → 樞紐分析表','開啟建立對話框'],['3','選擇「新工作表」放置樞紐分析表','在新工作表建立空白樞紐分析表'],['4','拖曳「地區」到列區域','報表左側出現北區/中區/南區'],['5','拖曳「產品」到欄區域','報表頂部出現筆電/手機/平板'],['6','拖曳「金額」到值區域','顯示各地區各產品的銷售加總'],['7（進階）','拖曳「季度」到篩選區域，篩選只看 Q1','整個報表只顯示 Q1 數據'],['8（進階）','右鍵金額欄位 → 值欄位設定 → 平均值','改為顯示平均客單價'],['9（進階）','插入 → 交叉分析篩選器 → 勾選「地區」和「產品」','建立可點選的篩選按鈕'],['10（進階）','右鍵日期欄位 → 群組 → 月','將日期聚合為月份顯示']];
+  const ws2=XLSX.utils.aoa_to_sheet(guide);ws2['!cols']=[{wch:10},{wch:44},{wch:28}];
+  XLSX.utils.book_append_sheet(wb,ws2,'練習步驟說明');
+  setTimeout(()=>{pb.style.width='100%';XLSX.writeFile(wb,'樞紐分析練習.xlsx');setTimeout(()=>{pw.style.display='none';pb.style.width='0';},600);},500);
+}
+</script>
+</body></html>
