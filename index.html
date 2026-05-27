@@ -316,11 +316,11 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   <div class="pb2">
     <div class="agg">
       <span style="font-size:12px;color:var(--t2);padding:4px 0">彙總方式：</span>
-      <button class="ab" onclick="setAgg('sum',this)" on">加總</button>
-      <button class="ab" onclick="setAgg('avg',this)"">平均值</button>
-      <button class="ab" onclick="setAgg('count',this)"">計數</button>
-      <button class="ab" onclick="setAgg('max',this)"">最大值</button>
-      <button class="ab" onclick="setAgg('min',this)"">最小值</button>
+      <button class="ab on" onclick="setAgg('sum',this)">加總</button>
+      <button class="ab" onclick="setAgg('avg',this)">平均值</button>
+      <button class="ab" onclick="setAgg('count',this)">計數</button>
+      <button class="ab" onclick="setAgg('max',this)">最大值</button>
+      <button class="ab" onclick="setAgg('min',this)">最小值</button>
     </div>
     <div class="bw">
       <div class="fp"><h3>可用欄位</h3><div id="fp"></div></div>
@@ -387,23 +387,23 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
     <h2>互動示範 — 點選篩選條件</h2>
     <div class="slw">
       <div class="slb"><div class="slt">地區</div>
-        <button class="sbt" onclick="tgSl(this,'region','全部')" on">全部</button>
-        <button class="sbt" onclick="tgSl(this,'region','北區')"">北區</button>
-        <button class="sbt" onclick="tgSl(this,'region','中區')"">中區</button>
-        <button class="sbt" onclick="tgSl(this,'region','南區')"">南區</button>
+        <button class="sbt on" onclick="tgSl(this,'region','全部')">全部</button>
+        <button class="sbt" onclick="tgSl(this,'region','北區')">北區</button>
+        <button class="sbt" onclick="tgSl(this,'region','中區')">中區</button>
+        <button class="sbt" onclick="tgSl(this,'region','南區')">南區</button>
       </div>
       <div class="slb"><div class="slt">產品</div>
-        <button class="sbt" onclick="tgSl(this,'product','全部')" on">全部</button>
-        <button class="sbt" onclick="tgSl(this,'product','筆電')"">筆電</button>
-        <button class="sbt" onclick="tgSl(this,'product','手機')"">手機</button>
-        <button class="sbt" onclick="tgSl(this,'product','平板')"">平板</button>
+        <button class="sbt on" onclick="tgSl(this,'product','全部')">全部</button>
+        <button class="sbt" onclick="tgSl(this,'product','筆電')">筆電</button>
+        <button class="sbt" onclick="tgSl(this,'product','手機')">手機</button>
+        <button class="sbt" onclick="tgSl(this,'product','平板')">平板</button>
       </div>
       <div class="slb"><div class="slt">季度</div>
-        <button class="sbt" onclick="tgSl(this,'quarter','全部')" on">全部</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q1')"">Q1</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q2')"">Q2</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q3')"">Q3</button>
-        <button class="sbt" onclick="tgSl(this,'quarter','Q4')"">Q4</button>
+        <button class="sbt on" onclick="tgSl(this,'quarter','全部')">全部</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q1')">Q1</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q2')">Q2</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q3')">Q3</button>
+        <button class="sbt" onclick="tgSl(this,'quarter','Q4')">Q4</button>
       </div>
     </div>
     <div id="sl-r" class="tw"></div>
@@ -452,10 +452,10 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   <div class="ph"><div class="badge">📈 視覺化</div><h1>樞紐圖表分析</h1><p class="desc">以下圖表模擬真實樞紐分析的各類視覺化報表，點選切換不同分析視角。</p></div>
   <div class="pb2">
     <div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap">
-      <button class="ab" onclick="scv('sales',this)" on">銷售分析</button>
-      <button class="ab" onclick="scv('trend',this)"">趨勢分析</button>
-      <button class="ab" onclick="scv('ratio',this)"">佔比分析</button>
-      <button class="ab" onclick="scv('perf',this)"">績效分析</button>
+      <button class="ab on" onclick="scv('sales',this)">銷售分析</button>
+      <button class="ab" onclick="scv('trend',this)">趨勢分析</button>
+      <button class="ab" onclick="scv('ratio',this)">佔比分析</button>
+      <button class="ab" onclick="scv('perf',this)">績效分析</button>
     </div>
     <div id="cv-sales">
       <div class="g2">
@@ -529,7 +529,7 @@ code{font-family:var(--mono);font-size:11px;background:#f1f5f9;color:#7c3aed;pad
   <div class="pb2">
     <div class="qh"><div class="qp"><span id="qA">0</span> / 10 已作答</div><div class="qp">正確 <span id="qC">0</span></div></div>
     <div id="qa"></div>
-    <button class="qnb" id="qnb" style="display:none" id="qnb-btn" >下一題 →</button>
+    <button class="qnb" id="qnb" onclick="nextQ()" style="display:none">下一題 →</button>
   </div>
 </div>
 
@@ -554,13 +554,13 @@ function dov(e,z){e.preventDefault();document.getElementById('z-'+z).classList.a
 function dlv(e,z){document.getElementById('z-'+z).classList.remove('dov');}
 function drp(e,z){e.preventDefault();dlv(e,z);const fid=e.dataTransfer.getData('fid');if(!fid)return;['row','col','val','flt'].forEach(zn=>{zs[zn]=zs[zn].filter(x=>x!==fid);});zs[z].push(fid);rChips();rPiv();}
 function rmC(fid,z){zs[z]=zs[z].filter(x=>x!==fid);rChips();rPiv();}
-function rChips(){const cls={row:'cr',col:'cc2',val:'cv',flt:'cf'};['row','col','val','flt'].forEach(z=>{document.getElementById('c-'+z).innerHTML=zs[z].map(fid=>{const f=FD.find(x=>x.id===fid);return '<span class="zc '+cls[z]+'">'+f.i+' '+f.l+'<span class="rm" onclick="rmC(''+fid+'',''+z+'')">✕</span></span>';}).join('');});}
+function rChips(){const cls={row:'cr',col:'cc2',val:'cv',flt:'cf'};['row','col','val','flt'].forEach(z=>{document.getElementById('c-'+z).innerHTML=zs[z].map(fid=>{const f=FD.find(x=>x.id===fid);return '<span class="zc '+cls[z]+'">'+f.i+' '+f.l+'<span class="rm" onclick="rmC(\'' +fid+ '\',\'' +z+ '\')">✕</span></span>';}).join('');});}
 function aV(v){if(!v||!v.length)return null;if(cAgg==='sum')return v.reduce((a,b)=>a+b,0);if(cAgg==='avg')return Math.round(v.reduce((a,b)=>a+b,0)/v.length);if(cAgg==='count')return v.length;if(cAgg==='max')return Math.max(...v);if(cAgg==='min')return Math.min(...v);}
 function fV(v){if(v===null)return'';return cAgg==='count'?v:v.toLocaleString();}
 function rPiv(){const out=document.getElementById('pout');const rF=zs.row,cF=zs.col,vF=zs.val[0];if(!rF.length&&!vF){out.innerHTML='<div class="pph">← 拖曳至少一個列欄位和一個值欄位來產生報表</div>';return;}const rK=r=>rF.map(f=>r[f]).join('||');const cK=r=>cF.map(f=>r[f]).join('||');const rKs=[...new Set(RD.map(rK))].sort();const cKs=[...new Set(RD.map(cK))].sort();let h='<div class="ptw"><table class="pt"><tr><th>'+rF.map(f=>FD.find(x=>x.id===f).l).join('/')+'</th>';if(cF.length){cKs.forEach(ck=>h+='<th class="ch">'+ck+'</th>');if(vF)h+='<th class="ch">總計</th>';}else if(vF){h+='<th class="ch">'+FD.find(x=>x.id===vF).l+'</th>';}h+='</tr>';rKs.forEach(rk=>{const rd=RD.filter(r=>rK(r)===rk);h+='<tr><td class="rl">'+rk+'</td>';if(vF){if(cF.length){let rv=[];cKs.forEach(ck=>{const c=rd.filter(r=>cK(r)===ck).map(r=>r[vF]);const v=aV(c);rv.push(v||0);h+='<td>'+fV(v)+'</td>';});h+='<td style="font-weight:700">'+fV(aV(rv))+'</td>';}else{h+='<td>'+fV(aV(rd.map(r=>r[vF])))+'</td>';}}h+='</tr>';});if(vF&&rKs.length>1){h+='<tr class="gr"><td class="rl">總計</td>';if(cF.length){cKs.forEach(ck=>h+='<td>'+fV(aV(RD.filter(r=>cK(r)===ck).map(r=>r[vF])))+'</td>');h+='<td>'+fV(aV(RD.map(r=>r[vF])))+'</td>';}else h+='<td>'+fV(aV(RD.map(r=>r[vF])))+'</td>';h+='</tr>';}h+='</table></div>';out.innerHTML=h;}
 const SD={北區:{筆電:{Q1:195000,Q2:198000,Q3:178000,Q4:412000},手機:{Q1:88000,Q2:92000,Q3:102000,Q4:145000},平板:{Q1:198000,Q2:122000,Q3:88000,Q4:155000}},中區:{筆電:{Q1:120000,Q2:256000,Q3:145000,Q4:198000},手機:{Q1:110000,Q2:189000,Q3:125000,Q4:234000},平板:{Q1:68000,Q2:122000,Q3:88000,Q4:102000}},南區:{筆電:{Q1:88000,Q2:110000,Q3:198000,Q4:145000},手機:{Q1:125000,Q2:145000,Q3:210000,Q4:122000},平板:{Q1:55000,Q2:88000,Q3:155000,Q4:68000}}};
 let SS={region:'全部',product:'全部',quarter:'全部'};
-function tgSl(el,d,v){document.querySelectorAll('[onclick*="''+d+''"]').forEach(b=>b.classList.remove('on'));el.classList.add('on');SS[d]=v;rSl();}
+function tgSl(el,d,v){document.querySelectorAll('.sbt').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+d+"'"))b.classList.remove('on');});el.classList.add('on');SS[d]=v;rSl();}
 function rSl(){const rs=SS.region==='全部'?['北區','中區','南區']:[SS.region];const ps=SS.product==='全部'?['筆電','手機','平板']:[SS.product];const qs=SS.quarter==='全部'?['Q1','Q2','Q3','Q4']:[SS.quarter];let h='<table class="t"><tr><th>地區</th>';ps.forEach(p=>h+='<th class="num">'+p+'</th>');h+='<th class="num">小計</th></tr>';let gt=0;rs.forEach(r=>{h+='<tr><td><span class="tag tb">'+r+'</span></td>';let rt=0;ps.forEach(p=>{let v=0;qs.forEach(q=>{v+=(SD[r]&&SD[r][p]&&SD[r][p][q])||0;});rt+=v;gt+=v;h+='<td class="num">'+v.toLocaleString()+'</td>';});h+='<td class="num" style="font-weight:700">'+rt.toLocaleString()+'</td></tr>';});h+='<tr style="font-weight:700"><td>總計</td>';ps.forEach(p=>{let v=0;rs.forEach(r=>qs.forEach(q=>{v+=(SD[r]&&SD[r][p]&&SD[r][p][q])||0;}));h+='<td class="num">'+v.toLocaleString()+'</td>';});h+='<td class="num">'+gt.toLocaleString()+'</td></tr></table>';document.getElementById('sl-r').innerHTML=h;}
 let cR=false;const P=['#2563eb','#059669','#d97706','#7c3aed','#dc2626'];
 function iC(){if(cR)return;cR=true;if(typeof Chart==='undefined'){setTimeout(iC,300);return;}Chart.defaults.font.family='-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif';Chart.defaults.color='#64748b';Chart.defaults.plugins.legend.labels.boxWidth=12;
